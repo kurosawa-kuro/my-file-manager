@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import VideoCard from '../components/VideoCard'
+import VideoListItem from '../components/VideoListItem'
 import VideoPlayer from '../components/VideoPlayer'
 import ThemeToggle from '../components/ThemeToggle'
 
@@ -113,9 +113,9 @@ export default function Home() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {videos.map((video) => (
-              <VideoCard
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+            {videos.map((video, index) => (
+              <VideoListItem
                 key={video.id}
                 video={video}
                 onPlay={handleVideoPlay}
