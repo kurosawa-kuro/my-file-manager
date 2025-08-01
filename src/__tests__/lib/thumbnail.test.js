@@ -39,14 +39,19 @@ describe('thumbnail', () => {
     jest.clearAllMocks();
     
     // デフォルトのモック設定
-    mockPath.join
-      .mockReturnValueOnce(mockThumbnailDir) // THUMBNAIL_DIR
-      .mockReturnValueOnce(mockThumbnailPath); // thumbnailPath
+    mockPath.join.mockImplementation((...args) => {
+      // THUMBNAIL_DIR construction: path.join(process.cwd(), 'public', 'thumbnails')
+      if (args.length === 3 && args[0] === '/mock/cwd' && args[1] === 'public' && args[2] === 'thumbnails') {
+        return mockThumbnailDir;
+      }
+      // thumbnailPath construction: path.join(THUMBNAIL_DIR, `${videoId}.jpg`)
+      if (args.length === 2 && args[0] === mockThumbnailDir && args[1] === 'test-video-123.jpg') {
+        return mockThumbnailPath;
+      }
+      return args.join('/');
+    });
     
     process.cwd = jest.fn().mockReturnValue('/mock/cwd');
-    
-    // モジュールを再読み込みしてTHUMBNAIL_DIRを設定
-    jest.resetModules();
   });
 
   describe('generateThumbnail', () => {

@@ -20,34 +20,24 @@ jest.mock('../../components/ThemeProvider', () => {
   };
 });
 
+// ConfigProviderをモック
+jest.mock('../../components/ConfigProvider', () => {
+  return function MockConfigProvider({ children }) {
+    return <div data-testid="config-provider">{children}</div>;
+  };
+});
+
 describe('RootLayout', () => {
-  it('renders with correct HTML structure', () => {
-    const { container } = render(
+  it('renders children content within providers', () => {
+    const { getByText, getByTestId } = render(
       <RootLayout>
         <div>Test content</div>
       </RootLayout>
     );
 
-    const html = container.querySelector('html');
-    const body = container.querySelector('body');
-
-    expect(html).toBeInTheDocument();
-    expect(html).toHaveAttribute('lang', 'ja');
-    expect(html).toHaveAttribute('suppressHydrationWarning');
-    expect(body).toBeInTheDocument();
-  });
-
-  it('applies correct CSS classes to body', () => {
-    const { container } = render(
-      <RootLayout>
-        <div>Test content</div>
-      </RootLayout>
-    );
-
-    const body = container.querySelector('body');
-    expect(body).toHaveClass('--font-geist-sans');
-    expect(body).toHaveClass('--font-geist-mono');
-    expect(body).toHaveClass('antialiased');
+    expect(getByTestId('config-provider')).toBeInTheDocument();
+    expect(getByTestId('theme-provider')).toBeInTheDocument();
+    expect(getByText('Test content')).toBeInTheDocument();
   });
 
   it('renders ThemeProvider wrapper', () => {

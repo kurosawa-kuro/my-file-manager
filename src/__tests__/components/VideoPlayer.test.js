@@ -1,19 +1,12 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import VideoPlayer from '../../components/VideoPlayer';
 
-// useRefとuseEffectをモック
+// HTMLVideoElementのfocusメソッドをモック
 const mockFocus = jest.fn();
-const mockRef = {
-  current: {
-    focus: mockFocus
-  }
-};
-
-jest.mock('react', () => ({
-  ...jest.requireActual('react'),
-  useRef: () => mockRef,
-  useEffect: jest.fn((callback) => callback())
-}));
+Object.defineProperty(HTMLVideoElement.prototype, 'focus', {
+  writable: true,
+  value: mockFocus,
+});
 
 describe('VideoPlayer', () => {
   const mockVideo = {
@@ -80,13 +73,12 @@ describe('VideoPlayer', () => {
     expect(video).toHaveAttribute('src', '/api/videos/test-video-1/stream');
   });
 
-  it('renders video source element', () => {
+  it('renders video with correct src attribute', () => {
     render(<VideoPlayer video={mockVideo} onClose={mockOnClose} />);
     
-    const source = document.querySelector('source');
-    expect(source).toBeInTheDocument();
-    expect(source).toHaveAttribute('src', '/api/videos/test-video-1/stream');
-    expect(source).toHaveAttribute('type', 'video/mp4');
+    const video = document.querySelector('video');
+    expect(video).toBeInTheDocument();
+    expect(video).toHaveAttribute('src', '/api/videos/test-video-1/stream');
   });
 
   it('displays video information correctly', () => {
@@ -96,10 +88,13 @@ describe('VideoPlayer', () => {
     expect(screen.getByText(/更新日:/)).toBeInTheDocument();
   });
 
-  it('focuses video element on mount', () => {
+  it('focuses video element on mount', async () => {
     render(<VideoPlayer video={mockVideo} onClose={mockOnClose} />);
     
-    expect(mockFocus).toHaveBeenCalledTimes(1);
+    // useEffectが非同期で実行されるのを少し待つ
+    await waitFor(() => {
+      expect(mockFocus).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('handles video error gracefully', () => {

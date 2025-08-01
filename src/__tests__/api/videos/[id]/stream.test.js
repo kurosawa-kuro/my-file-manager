@@ -3,16 +3,15 @@ import { NextResponse } from 'next/server';
 import { listVideoFiles } from '../../../../lib/listFiles';
 import fs from 'fs';
 
-// モックの設定
-const mockJson = jest.fn();
-const mockNextResponse = jest.fn().mockImplementation((body, options) => ({
-  status: options?.status || 200,
-  headers: new Map(Object.entries(options?.headers || {})),
-  json: mockJson
-}));
-
 jest.mock('next/server', () => ({
-  NextResponse: mockNextResponse
+  NextResponse: {
+    json: jest.fn((body, options) => ({
+      status: options?.status || 200,
+      headers: new Map(Object.entries(options?.headers || {})),
+      json: jest.fn(),
+      body
+    }))
+  }
 }));
 
 jest.mock('../../../../lib/listFiles');
@@ -125,7 +124,7 @@ describe('GET /api/videos/[id]/stream', () => {
 
     await GET(mockRequest, { params: mockParams });
 
-    expect(mockJson).toHaveBeenCalledWith(
+    expect(NextResponse.json).toHaveBeenCalledWith(
       { error: '環境変数 VIDEO_DIR が未設定です。' },
       { status: 500 }
     );
@@ -141,7 +140,7 @@ describe('GET /api/videos/[id]/stream', () => {
 
     await GET(mockRequest, { params: mockParams });
 
-    expect(mockJson).toHaveBeenCalledWith(
+    expect(NextResponse.json).toHaveBeenCalledWith(
       { error: 'ビデオファイルが見つかりません。' },
       { status: 404 }
     );
@@ -164,7 +163,7 @@ describe('GET /api/videos/[id]/stream', () => {
 
     await GET(mockRequest, { params: mockParams });
 
-    expect(mockJson).toHaveBeenCalledWith(
+    expect(NextResponse.json).toHaveBeenCalledWith(
       { error: 'ビデオの配信に失敗しました。' },
       { status: 500 }
     );
@@ -190,7 +189,7 @@ describe('GET /api/videos/[id]/stream', () => {
 
     await GET(mockRequest, { params: mockParams });
 
-    expect(mockJson).toHaveBeenCalledWith(
+    expect(NextResponse.json).toHaveBeenCalledWith(
       { error: 'ビデオの配信に失敗しました。' },
       { status: 500 }
     );
@@ -211,7 +210,7 @@ describe('GET /api/videos/[id]/stream', () => {
 
     await GET(mockRequest, { params: mockParams });
 
-    expect(mockJson).toHaveBeenCalledWith(
+    expect(NextResponse.json).toHaveBeenCalledWith(
       { error: 'ビデオの配信に失敗しました。' },
       { status: 500 }
     );
@@ -231,7 +230,7 @@ describe('GET /api/videos/[id]/stream', () => {
 
     await GET(mockRequest, { params: mockParams });
 
-    expect(mockJson).toHaveBeenCalledWith(
+    expect(NextResponse.json).toHaveBeenCalledWith(
       { error: 'ビデオの配信に失敗しました。' },
       { status: 500 }
     );
