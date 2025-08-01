@@ -1,6 +1,20 @@
 import { listVideoFiles } from '../../../../../lib/listFiles.js';
 import { NextResponse } from 'next/server';
 import fs from 'fs';
+import path from 'path';
+
+function getContentType(filePath) {
+  const ext = path.extname(filePath).toLowerCase();
+  const mimeTypes = {
+    '.mp4': 'video/mp4',
+    '.mkv': 'video/x-matroska',
+    '.mov': 'video/quicktime',
+    '.avi': 'video/x-msvideo',
+    '.webm': 'video/webm',
+    '.ts': 'video/mp2t'
+  };
+  return mimeTypes[ext] || 'video/mp4';
+}
 
 export async function GET(request, { params }) {
   const { VIDEO_DIR } = process.env;
@@ -28,6 +42,7 @@ export async function GET(request, { params }) {
     const stat = fs.statSync(videoPath);
     const fileSize = stat.size;
     const range = request.headers.get('range');
+    const contentType = getContentType(videoPath);
 
     if (range) {
       const parts = range.replace(/bytes=/, "").split("-");
@@ -42,7 +57,7 @@ export async function GET(request, { params }) {
           'Content-Range': `bytes ${start}-${end}/${fileSize}`,
           'Accept-Ranges': 'bytes',
           'Content-Length': chunksize.toString(),
-          'Content-Type': 'video/mp4'
+          'Content-Type': contentType
         }
       });
     } else {
@@ -50,7 +65,7 @@ export async function GET(request, { params }) {
       return new NextResponse(file, {
         headers: {
           'Content-Length': fileSize.toString(),
-          'Content-Type': 'video/mp4'
+          'Content-Type': contentType
         }
       });
     }

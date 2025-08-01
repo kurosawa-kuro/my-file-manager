@@ -14,6 +14,11 @@ export default function VideoListItem({ video, onPlay, onFileMove }) {
     return new Date(dateString).toLocaleDateString('ja-JP')
   }
 
+  const formatFolderPath = (folderPath) => {
+    // Display only the folder name, not the full path
+    return folderPath.split(/[/\\]/).pop() || 'ルート'
+  }
+
   const handleMoveToQQQ = async (e) => {
     e.stopPropagation()
     
@@ -129,6 +134,8 @@ export default function VideoListItem({ video, onPlay, onFileMove }) {
             </div>
           </div>
           <div className="flex items-center mt-1 text-xs text-gray-500 dark:text-gray-400 space-x-4">
+            <span>{formatFolderPath(video.folder)}</span>
+            <span>•</span>
             <span>{formatFileSize(video.size)}</span>
             <span>•</span>
             <span>{formatDate(video.modified)}</span>
