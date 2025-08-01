@@ -3,7 +3,7 @@ const DEFAULT_CONFIG = {
   environment: {
     videoDir: 'C:\\Users\\owner\\Downloads\\Video',
     fileSortOrder: 'name', // 'newest' or 'name
-    isQqqOnly: true // true or false
+    isQqqOnly: false // true or false
   },
   app: {
     title: 'Video File Manager',
@@ -21,8 +21,7 @@ const DEFAULT_CONFIG = {
   directory: {
     watchPath: '',
     includeSubdirectories: true,
-    supportedFormats: ['.mp4', '.webm', '.ogg', '.avi', '.mov', '.wmv', '.flv', '.mkv'],
-    isQqqOnly: false
+    supportedFormats: ['.mp4', '.webm', '.ogg', '.avi', '.mov', '.wmv', '.flv', '.mkv']
   },
   ui: {
     itemsPerPage: 20,
@@ -31,7 +30,6 @@ const DEFAULT_CONFIG = {
     gridView: false,
     showThumbnails: true,
     showFileInfo: true,
-    fileSortOrder: 'newest' // 'newest' or 'name'
   },
   performance: {
     enableThumbnailGeneration: true,

@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { listVideoFiles } from '../../../../lib/listFiles.js';
+import { DEFAULT_CONFIG } from '../../../../lib/config.js';
+import ConfigManager from '../../../../lib/configManager.js';
 
 export async function POST(request) {
   try {
@@ -14,11 +16,20 @@ export async function POST(request) {
       );
     }
 
-    const { VIDEO_DIR } = process.env;
+    // Load config
+    let config = DEFAULT_CONFIG;
+    try {
+      const configManager = new ConfigManager();
+      config = configManager.loadConfig();
+    } catch (error) {
+      console.log('Using default config:', error.message);
+    }
     
-    if (!VIDEO_DIR) {
+    const videoDir = config?.environment?.videoDir || process.env.VIDEO_DIR;
+    
+    if (!videoDir) {
       return NextResponse.json(
-        { error: '環境変数 VIDEO_DIR が未設定です。' },
+        { error: '動画ディレクトリが未設定です。' },
         { status: 500 }
       );
     }
@@ -32,7 +43,7 @@ export async function POST(request) {
     }
 
     // ビデオファイルリストから実際のファイルを検索
-    const videoFiles = listVideoFiles(VIDEO_DIR);
+    const videoFiles = listVideoFiles(videoDir);
     const targetVideo = videoFiles.find(video => video.id === videoId);
     
     if (!targetVideo) {

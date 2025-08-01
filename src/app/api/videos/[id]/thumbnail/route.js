@@ -3,20 +3,32 @@ import { generateThumbnail } from '../../../../../lib/thumbnail.js';
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
+import { DEFAULT_CONFIG } from '../../../../../lib/config.js';
+import ConfigManager from '../../../../../lib/configManager.js';
 
 export async function GET(request, { params }) {
-  const { VIDEO_DIR } = process.env;
   const { id } = (await params);
 
-  if (!VIDEO_DIR) {
+  // Load config
+  let config = DEFAULT_CONFIG;
+  try {
+    const configManager = new ConfigManager();
+    config = configManager.loadConfig();
+  } catch (error) {
+    console.log('Using default config:', error.message);
+  }
+  
+  const videoDir = config?.environment?.videoDir || process.env.VIDEO_DIR;
+
+  if (!videoDir) {
     return NextResponse.json(
-      { error: '環境変数 VIDEO_DIR が未設定です。' },
+      { error: '動画ディレクトリが未設定です。' },
       { status: 500 }
     );
   }
 
   try {
-    const files = listVideoFiles(VIDEO_DIR);
+    const files = listVideoFiles(videoDir);
     const video = files.find(file => file.id === id);
 
     if (!video) {
