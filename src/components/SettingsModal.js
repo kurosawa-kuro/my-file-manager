@@ -50,6 +50,7 @@ export default function SettingsModal({ isOpen, onClose }) {
     { id: 'app', label: 'アプリ設定' },
     { id: 'video', label: '動画設定' },
     { id: 'directory', label: 'ディレクトリ設定' },
+    { id: 'environment', label: '環境設定' },
     { id: 'ui', label: 'UI設定' },
     { id: 'performance', label: 'パフォーマンス' },
     { id: 'import-export', label: 'インポート/エクスポート' }
@@ -242,22 +243,38 @@ export default function SettingsModal({ isOpen, onClose }) {
                   </div>
                 )}
 
-                {activeTab === 'directory' && (
-                  <div className="space-y-6">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white">ディレクトリ設定</h3>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                        監視パス
-                      </label>
-                      <input
-                        type="text"
-                        value={config.directory.watchPath}
-                        onChange={(e) => handleInputChange('directory.watchPath', e.target.value)}
-                        placeholder="例: /path/to/videos"
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      />
-                    </div>
+                                 {activeTab === 'directory' && (
+                   <div className="space-y-6">
+                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">ディレクトリ設定</h3>
+                     
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                         監視パス
+                       </label>
+                       <input
+                         type="text"
+                         value={config.directory.watchPath}
+                         onChange={(e) => handleInputChange('directory.watchPath', e.target.value)}
+                         placeholder="例: /path/to/videos"
+                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                       />
+                     </div>
+
+                     <div className="flex items-center">
+                       <input
+                         type="checkbox"
+                         id="isQqqOnly"
+                         checked={config.directory.isQqqOnly}
+                         onChange={(e) => handleInputChange('directory.isQqqOnly', e.target.checked)}
+                         className="h-4 w-4 text-blue-600 rounded border-gray-300 dark:border-gray-600"
+                       />
+                       <label htmlFor="isQqqOnly" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                         QQQモード（qqqフォルダのみ表示）
+                       </label>
+                     </div>
+                     <div className="text-xs text-gray-500 dark:text-gray-400 ml-6">
+                       有効にすると、VIDEO_DIR/qqqフォルダ内の動画ファイルのみが表示されます。
+                     </div>
 
                     <div className="flex items-center">
                       <input
@@ -287,9 +304,67 @@ export default function SettingsModal({ isOpen, onClose }) {
                       </p>
                     </div>
                   </div>
-                )}
+                                 )}
 
-                {activeTab === 'ui' && (
+                 {activeTab === 'environment' && (
+                   <div className="space-y-6">
+                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">環境設定</h3>
+                     <p className="text-sm text-gray-600 dark:text-gray-400">
+                       これらの設定は環境変数よりも優先されます。アプリケーション再起動後に反映されます。
+                     </p>
+                     
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                         動画ディレクトリ
+                       </label>
+                       <input
+                         type="text"
+                         value={config.environment.videoDir}
+                         onChange={(e) => handleInputChange('environment.videoDir', e.target.value)}
+                         placeholder="例: C:\Users\owner\Downloads\Video"
+                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                       />
+                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                         動画ファイルが格納されているディレクトリのパス
+                       </p>
+                     </div>
+
+                     <div>
+                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                         ファイル表示順番
+                       </label>
+                       <select
+                         value={config.environment.fileSortOrder}
+                         onChange={(e) => handleInputChange('environment.fileSortOrder', e.target.value)}
+                         className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                       >
+                         <option value="newest">新しいファイル順番</option>
+                         <option value="name">ファイル名順番</option>
+                       </select>
+                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                         ファイル一覧の表示順序
+                       </p>
+                     </div>
+
+                     <div className="flex items-center">
+                       <input
+                         type="checkbox"
+                         id="envIsQqqOnly"
+                         checked={config.environment.isQqqOnly}
+                         onChange={(e) => handleInputChange('environment.isQqqOnly', e.target.checked)}
+                         className="h-4 w-4 text-blue-600 rounded border-gray-300 dark:border-gray-600"
+                       />
+                       <label htmlFor="envIsQqqOnly" className="ml-2 text-sm text-gray-700 dark:text-gray-300">
+                         QQQモード（qqqフォルダのみ表示）
+                       </label>
+                     </div>
+                     <div className="text-xs text-gray-500 dark:text-gray-400 ml-6">
+                       有効にすると、動画ディレクトリ内のqqqフォルダのみが表示されます。
+                     </div>
+                   </div>
+                 )}
+
+                 {activeTab === 'ui' && (
                   <div className="space-y-6">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">UI設定</h3>
                     
@@ -333,6 +408,20 @@ export default function SettingsModal({ isOpen, onClose }) {
                       >
                         <option value="asc">昇順</option>
                         <option value="desc">降順</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        ファイル表示順番
+                      </label>
+                      <select
+                        value={config.ui.fileSortOrder}
+                        onChange={(e) => handleInputChange('ui.fileSortOrder', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      >
+                        <option value="newest">新しいファイル順番</option>
+                        <option value="name">ファイル名順番</option>
                       </select>
                     </div>
 

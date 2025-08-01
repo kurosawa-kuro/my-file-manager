@@ -1,4 +1,10 @@
 const DEFAULT_CONFIG = {
+  // 環境変数相当の設定を追加
+  environment: {
+    videoDir: 'C:\\Users\\owner\\Downloads\\Video',
+    fileSortOrder: 'name', // 'newest' or 'name
+    isQqqOnly: 'true' // true or false
+  },
   app: {
     title: 'Video File Manager',
     subtitle: 'ローカル動画ファイルマネージャー',
@@ -15,7 +21,8 @@ const DEFAULT_CONFIG = {
   directory: {
     watchPath: '',
     includeSubdirectories: true,
-    supportedFormats: ['.mp4', '.webm', '.ogg', '.avi', '.mov', '.wmv', '.flv', '.mkv']
+    supportedFormats: ['.mp4', '.webm', '.ogg', '.avi', '.mov', '.wmv', '.flv', '.mkv'],
+    isQqqOnly: false
   },
   ui: {
     itemsPerPage: 20,
@@ -23,13 +30,14 @@ const DEFAULT_CONFIG = {
     sortOrder: 'asc',
     gridView: false,
     showThumbnails: true,
-    showFileInfo: true
+    showFileInfo: true,
+    fileSortOrder: 'newest' // 'newest' or 'name'
   },
   performance: {
     enableThumbnailGeneration: true,
     thumbnailCacheSize: 100,
     videoPreloadCount: 3
-  }
+  },
 }
 
 const CONFIG_SCHEMA = {
@@ -49,7 +57,8 @@ const CONFIG_SCHEMA = {
   directory: {
     watchPath: { type: 'string', required: false },
     includeSubdirectories: { type: 'boolean', required: true },
-    supportedFormats: { type: 'array', items: 'string', required: true }
+    supportedFormats: { type: 'array', items: 'string', required: true },
+    isQqqOnly: { type: 'boolean', required: true }
   },
   ui: {
     itemsPerPage: { type: 'number', min: 1, max: 100, required: true },
@@ -57,12 +66,18 @@ const CONFIG_SCHEMA = {
     sortOrder: { type: 'string', enum: ['asc', 'desc'], required: true },
     gridView: { type: 'boolean', required: true },
     showThumbnails: { type: 'boolean', required: true },
-    showFileInfo: { type: 'boolean', required: true }
+    showFileInfo: { type: 'boolean', required: true },
+    fileSortOrder: { type: 'string', enum: ['newest', 'name'], required: true }
   },
   performance: {
     enableThumbnailGeneration: { type: 'boolean', required: true },
     thumbnailCacheSize: { type: 'number', min: 10, max: 1000, required: true },
     videoPreloadCount: { type: 'number', min: 0, max: 10, required: true }
+  },
+  environment: {
+    videoDir: { type: 'string', required: true },
+    fileSortOrder: { type: 'string', enum: ['newest', 'name'], required: true },
+    isQqqOnly: { type: 'boolean', required: true }
   }
 }
 

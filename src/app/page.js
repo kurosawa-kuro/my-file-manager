@@ -1,10 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import VideoListItem from '../components/VideoListItem'
 import VideoPlayer from '../components/VideoPlayer'
 import ThemeToggle from '../components/ThemeToggle'
 import SettingsButton from '../components/SettingsButton'
+import SortSelector from '../components/SortSelector'
 import { useConfig } from '../components/ConfigProvider'
 
 export default function Home() {
@@ -13,19 +14,46 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   const [selectedVideo, setSelectedVideo] = useState(null)
   const [error, setError] = useState(null)
+  // 設定ファイルのenvironmentセクションを優先、フォールバックとして設定ファイルのuiセクションを使用
+  const [sortOrder, setSortOrder] = useState(() => {
+    return config?.environment?.fileSortOrder || config?.ui?.fileSortOrder || 'newest'
+  })
+  const [isQqqOnly, setIsQqqOnly] = useState(false)
+  const [currentDirectory, setCurrentDirectory] = useState('')
+  const isInitialized = useRef(false)
+
+  useEffect(() => {
+    // 設定ファイルのenvironmentセクションが変更された場合に更新
+    const envSortOrder = config?.environment?.fileSortOrder
+    if (envSortOrder && sortOrder !== envSortOrder) {
+      setSortOrder(envSortOrder)
+    } else if (!envSortOrder && config?.ui?.fileSortOrder && sortOrder !== config.ui.fileSortOrder) {
+      setSortOrder(config.ui.fileSortOrder)
+    }
+  }, [config?.environment?.fileSortOrder, config?.ui?.fileSortOrder, sortOrder])
 
   useEffect(() => {
     fetchVideos()
-  }, [])
+  }, [sortOrder])
 
   const fetchVideos = async () => {
     try {
       setLoading(true)
+      // クエリパラメータを指定しない場合、APIが設定ファイルから自動的に取得する
       const res = await fetch('/api/videos')
       const data = await res.json()
       
       if (res.ok) {
         setVideos(data.videos || [])
+        setIsQqqOnly(data.isQqqOnly || false)
+        setCurrentDirectory(data.directory || '')
+        
+        // 初期化時のみ、APIから返されたsortOrderを使用（設定ファイルが優先される）
+        if (!isInitialized.current && data.sortOrder && data.sortOrder !== sortOrder) {
+          console.log('Initializing sort order from API:', data.sortOrder)
+          setSortOrder(data.sortOrder)
+          isInitialized.current = true
+        }
       } else {
         setError(data.error || '動画の取得に失敗しました')
       }
@@ -47,6 +75,10 @@ export default function Home() {
 
   const handleFileMove = (videoId) => {
     setVideos(prevVideos => prevVideos.filter(video => video.id !== videoId))
+  }
+
+  const handleSortChange = (newSortOrder) => {
+    setSortOrder(newSortOrder)
   }
 
   if (loading) {
@@ -86,15 +118,26 @@ export default function Home() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 🎬 {config?.app?.title || 'Video File Manager'}
+                {isQqqOnly && (
+                  <span className="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
+                    QQQモード
+                  </span>
+                )}
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400">
                 {config?.app?.subtitle || 'ローカル動画ファイルマネージャー'}
+                {currentDirectory && (
+                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-500">
+                    📁 {currentDirectory}
+                  </span>
+                )}
               </p>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {videos.length} 件の動画
               </div>
+              <SortSelector currentSort={sortOrder} onSortChange={handleSortChange} />
               <SettingsButton />
               <ThemeToggle />
             </div>
@@ -108,10 +151,13 @@ export default function Home() {
           <div className="text-center py-12">
             <div className="text-6xl mb-4">📁</div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-              動画ファイルが見つかりません
+              {isQqqOnly ? 'QQQフォルダに動画ファイルが見つかりません' : '動画ファイルが見つかりません'}
             </h3>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              設定されたディレクトリに動画ファイルがないか、アクセスできません。
+              {isQqqOnly 
+                ? 'QQQフォルダに動画ファイルがないか、アクセスできません。'
+                : '設定されたディレクトリに動画ファイルがないか、アクセスできません。'
+              }
             </p>
             <button
               onClick={fetchVideos}
