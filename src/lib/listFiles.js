@@ -28,6 +28,12 @@ export function listVideoFiles(dir, sortOrder = null, config = null) {
 
       if (stat.isDirectory()) return listVideoFiles(full);
       if (VIDEO_EXT.has(path.extname(full).toLowerCase())) {
+        // QQQモードの場合、ファイル名に'ggg'が含まれるファイルを除外
+        if (isQqqOnly && name.toLowerCase().includes('ggg')) {
+          console.log('Excluding file with "ggg" in filename:', name);
+          return [];
+        }
+        
         // Generate unique ID for each file
         const id = crypto.createHash('md5').update(full).digest('hex');
         return [{
