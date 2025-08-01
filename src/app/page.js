@@ -42,6 +42,10 @@ export default function Home() {
     setSelectedVideo(null)
   }
 
+  const handleFileMove = (videoId) => {
+    setVideos(prevVideos => prevVideos.filter(video => video.id !== videoId))
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -119,6 +123,7 @@ export default function Home() {
                 key={video.id}
                 video={video}
                 onPlay={handleVideoPlay}
+                onFileMove={handleFileMove}
               />
             ))}
           </div>

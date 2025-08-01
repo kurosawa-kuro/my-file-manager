@@ -19,7 +19,9 @@
       "Bash(then rmdir src/scripts)",
       "Bash(fi)",
       "Bash(if [ -d \"src\" ])",
-      "Bash(then rmdir src)"
+      "Bash(then rmdir src)",
+      "Bash(npm run lint)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }

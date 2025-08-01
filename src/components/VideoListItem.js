@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-export default function VideoListItem({ video, onPlay }) {
+export default function VideoListItem({ video, onPlay, onFileMove }) {
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes'
     const k = 1024
@@ -13,6 +13,97 @@ export default function VideoListItem({ video, onPlay }) {
 
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('ja-JP')
+  }
+
+  const handleMoveToQQQ = async (e) => {
+    e.stopPropagation()
+    
+    try {
+      const response = await fetch('/api/videos/move', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          videoId: video.id,
+          fileName: video.name
+        })
+      })
+
+      const result = await response.json()
+      
+      if (response.ok) {
+        if (onFileMove) {
+          onFileMove(video.id)
+        }
+      } else {
+        alert('エラー: ' + result.error)
+      }
+    } catch (error) {
+      console.error('Move error:', error)
+      alert('ファイルの移動中にエラーが発生しました。')
+    }
+  }
+
+  const handleMoveToDelete = async (e) => {
+    e.stopPropagation()
+    
+    try {
+      const response = await fetch('/api/videos/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          videoId: video.id,
+          fileName: video.name
+        })
+      })
+
+      const result = await response.json()
+      
+      if (response.ok) {
+        if (onFileMove) {
+          onFileMove(video.id)
+        }
+      } else {
+        alert('エラー: ' + result.error)
+      }
+    } catch (error) {
+      console.error('Delete move error:', error)
+      alert('ファイルの移動中にエラーが発生しました。')
+    }
+  }
+
+  const handleAddGGGSuffix = async (e) => {
+    e.stopPropagation()
+    
+    try {
+      const response = await fetch('/api/videos/rename', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          videoId: video.id,
+          fileName: video.name,
+          suffix: ' ggg'
+        })
+      })
+
+      const result = await response.json()
+      
+      if (response.ok) {
+        // ファイル名が変更されたので、リストを更新する必要があります
+        // 今回は簡単にリロードします
+        window.location.reload()
+      } else {
+        alert('エラー: ' + result.error)
+      }
+    } catch (error) {
+      console.error('Rename error:', error)
+      alert('ファイル名の変更中にエラーが発生しました。')
+    }
   }
 
   return (
@@ -48,17 +139,29 @@ export default function VideoListItem({ video, onPlay }) {
         {/* Action Buttons */}
         <div className="flex-shrink-0 ml-4 flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
           {/* qqq Folder Move Button */}
-          <button className="w-8 h-8 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center">
+          <button 
+            onClick={handleMoveToQQQ}
+            className="w-8 h-8 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center"
+            title="qqqフォルダに移動"
+          >
             <span className="text-xs font-bold">qqq</span>
           </button>
           
           {/* ggg Suffix Add Button */}
-          <button className="w-8 h-8 bg-yellow-600 hover:bg-yellow-700 text-white rounded-full flex items-center justify-center">
+          <button 
+            onClick={handleAddGGGSuffix}
+            className="w-8 h-8 bg-yellow-600 hover:bg-yellow-700 text-white rounded-full flex items-center justify-center"
+            title="ファイル名末尾に ggg を追加"
+          >
             <span className="text-xs font-bold">ggg</span>
           </button>
           
           {/* Delete Button */}
-          <button className="w-8 h-8 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center">
+          <button 
+            onClick={handleMoveToDelete}
+            className="w-8 h-8 bg-red-600 hover:bg-red-700 text-white rounded-full flex items-center justify-center"
+            title="削除予定フォルダに移動"
+          >
             <span className="text-xs">🗑️</span>
           </button>
           
