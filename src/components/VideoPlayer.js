@@ -56,7 +56,7 @@ export default function VideoPlayer({ video, onClose }) {
         <div className="mt-4 text-white text-sm space-y-1">
           <div className="flex items-center justify-between">
             <span>ファイル名: {video.name}</span>
-            <span className="bg-white bg-opacity-20 px-2 py-1 rounded">
+            <span className="bg-white text-black bg-opacity-20 px-2 py-1 rounded">
               {video.extension.toUpperCase()}
             </span>
           </div>

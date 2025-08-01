@@ -4,8 +4,11 @@ import { useEffect, useState } from 'react'
 import VideoListItem from '../components/VideoListItem'
 import VideoPlayer from '../components/VideoPlayer'
 import ThemeToggle from '../components/ThemeToggle'
+import SettingsButton from '../components/SettingsButton'
+import { useConfig } from '../components/ConfigProvider'
 
 export default function Home() {
+  const { config } = useConfig()
   const [videos, setVideos] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedVideo, setSelectedVideo] = useState(null)
@@ -82,16 +85,17 @@ export default function Home() {
           <div className="flex justify-between items-center h-16">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                🎬 Video File Manager
+                🎬 {config?.app?.title || 'Video File Manager'}
               </h1>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                ローカル動画ファイルマネージャー
+                {config?.app?.subtitle || 'ローカル動画ファイルマネージャー'}
               </p>
             </div>
             <div className="flex items-center space-x-4">
               <div className="text-sm text-gray-600 dark:text-gray-400">
                 {videos.length} 件の動画
               </div>
+              <SettingsButton />
               <ThemeToggle />
             </div>
           </div>
