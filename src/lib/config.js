@@ -3,7 +3,7 @@ const DEFAULT_CONFIG = {
   environment: {
     videoDir: 'C:\\Users\\owner\\Downloads\\Video',
     fileSortOrder: 'name', // 'newest' or 'name
-    isQqqOnly: 'true' // true or false
+    isQqqOnly: true // true or false
   },
   app: {
     title: 'Video File Manager',

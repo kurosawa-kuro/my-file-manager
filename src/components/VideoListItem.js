@@ -1,6 +1,5 @@
 'use client'
 
-
 export default function VideoListItem({ video, onPlay, onFileMove }) {
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes'
@@ -18,6 +17,9 @@ export default function VideoListItem({ video, onPlay, onFileMove }) {
     // Display only the folder name, not the full path
     return folderPath.split(/[/\\]/).pop() || 'ルート'
   }
+
+  // ファイル名に'ggg'が含まれるかチェック
+  const hasGGG = video.name.toLowerCase().includes('ggg')
 
   const handleMoveToQQQ = async (e) => {
     e.stopPropagation()
@@ -134,11 +136,22 @@ export default function VideoListItem({ video, onPlay, onFileMove }) {
             </div>
           </div>
           <div className="flex items-center mt-1 text-xs text-gray-500 dark:text-gray-400 space-x-4">
-            <span>{formatFolderPath(video.folder)}</span>
+            <span>
+              {formatFolderPath(video.folder)}
+              {hasGGG && (
+                <span className="ml-1 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200">
+                  ggg
+                </span>
+              )}
+            </span>
             <span>•</span>
-            <span>{formatFileSize(video.size)}</span>
+            <span>
+              {formatFileSize(video.size)}
+            </span>
             <span>•</span>
-            <span>{formatDate(video.modified)}</span>
+            <span>
+              {formatDate(video.modified)}
+            </span>
           </div>
         </div>
         
