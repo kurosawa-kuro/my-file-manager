@@ -21,7 +21,7 @@ const DEFAULT_CONFIG = {
   directory: {
     watchPath: '',
     includeSubdirectories: true,
-    supportedFormats: ['.mp4', '.webm', '.ogg', '.avi', '.mov', '.wmv', '.flv', '.mkv']
+    supportedFormats: ['.mp4', '.webm', '.ogg', '.avi', '.mov', '.wmv', '.flv', '.mkv', '.ts']
   },
   ui: {
     itemsPerPage: 20,
