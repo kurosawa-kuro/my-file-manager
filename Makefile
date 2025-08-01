@@ -8,12 +8,6 @@ dev:
 build:
 	cd src && npm run build
 
-test:
-	cd src && npm run test
-
-clean:
-	cd src && npm run clean
-
 start:
 	cd src && npm run start
 
@@ -25,4 +19,10 @@ test:
 
 test-watch:
 	cd src && npm run test:watch
+
+test-coverage:
+	cd src && npm run test:coverage
+
+clean:
+	cd src && rm -rf .next node_modules/.cache
 

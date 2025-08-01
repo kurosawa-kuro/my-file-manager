@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import VideoListItem from '../components/VideoListItem'
 import VideoPlayer from '../components/VideoPlayer'
 import ThemeToggle from '../components/ThemeToggle'
@@ -32,11 +32,7 @@ export default function Home() {
     }
   }, [config?.environment?.fileSortOrder, config?.ui?.fileSortOrder, sortOrder])
 
-  useEffect(() => {
-    fetchVideos()
-  }, [sortOrder])
-
-  const fetchVideos = async () => {
+  const fetchVideos = useCallback(async () => {
     try {
       setLoading(true)
       // クエリパラメータを指定しない場合、APIが設定ファイルから自動的に取得する
@@ -63,7 +59,11 @@ export default function Home() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [sortOrder, isInitialized])
+
+  useEffect(() => {
+    fetchVideos()
+  }, [fetchVideos])
 
   const handleVideoPlay = (video) => {
     setSelectedVideo(video)

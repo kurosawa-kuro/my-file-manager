@@ -1,7 +1,7 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import ThemeProvider from "../components/ThemeProvider";
-import ConfigProvider from "../components/ConfigProvider";
+import { Geist, Geist_Mono } from "next/font/google"
+import "./globals.css"
+import ThemeProvider from "../components/ThemeProvider"
+import ConfigProvider from "../components/ConfigProvider"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Video File Manager",
   description: "ローカル動画ファイルマネージャー",
-};
+}
 
 export default function RootLayout({ children }) {
   return (

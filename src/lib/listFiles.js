@@ -16,7 +16,9 @@ export function listVideoFiles(dir, sortOrder = null, config = null) {
     if (isQqqOnly) {
       const qqqDir = path.join(dir, 'qqq');
       if (!fs.existsSync(qqqDir)) {
-        console.log('QQQ directory not found:', qqqDir);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('QQQ directory not found:', qqqDir)
+        }
         return [];
       }
       dir = qqqDir;
@@ -30,7 +32,9 @@ export function listVideoFiles(dir, sortOrder = null, config = null) {
       if (VIDEO_EXT.has(path.extname(full).toLowerCase())) {
         // QQQモードの場合、ファイル名に'ggg'が含まれるファイルを除外
         if (isQqqOnly && name.toLowerCase().includes('ggg')) {
-          console.log('Excluding file with "ggg" in filename:', name);
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Excluding file with "ggg" in filename:', name)
+          }
           return [];
         }
         
