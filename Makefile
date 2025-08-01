@@ -20,3 +20,9 @@ start:
 lint:
 	cd src && npm run lint
 
+test:
+	cd src && npm run test
+
+test-watch:
+	cd src && npm run test:watch
+

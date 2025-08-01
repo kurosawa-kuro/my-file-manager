@@ -21,7 +21,9 @@
       "Bash(if [ -d \"src\" ])",
       "Bash(then rmdir src)",
       "Bash(npm run lint)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(cloc:*)",
+      "Bash(npm test)"
     ],
     "deny": []
   }
