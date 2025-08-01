@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
 import { DEFAULT_CONFIG } from '../../../../../lib/config.js';
-import ConfigManager from '../../../../../lib/configManager.js';
+import { getConfigManager } from '../../../../../lib/sqliteConfigManager.js';
 
 function getContentType(filePath) {
   const ext = path.extname(filePath).toLowerCase();
@@ -24,8 +24,8 @@ export async function GET(request, { params }) {
   // Load config
   let config = DEFAULT_CONFIG;
   try {
-    const configManager = new ConfigManager();
-    config = configManager.loadConfig();
+    const configManager = await getConfigManager();
+    config = await configManager.loadConfig();
   } catch (error) {
     console.log('Using default config:', error.message);
   }

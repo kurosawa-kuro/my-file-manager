@@ -2,7 +2,7 @@ const DEFAULT_CONFIG = {
   // 環境変数相当の設定を追加
   environment: {
     videoDir: 'C:\\Users\\owner\\Downloads\\Video',
-    fileSortOrder: 'name', // 'newest' or 'name
+    fileSortOrder: 'newest', // 'newest' or 'name
     isQqqOnly: false // true or false
   },
   app: {

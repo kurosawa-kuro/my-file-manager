@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { listVideoFiles } from '../../../../lib/listFiles.js';
 import { DEFAULT_CONFIG } from '../../../../lib/config.js';
-import ConfigManager from '../../../../lib/configManager.js';
+import { getConfigManager } from '../../../../lib/sqliteConfigManager.js';
 
 export async function POST(request) {
   try {
@@ -19,8 +19,8 @@ export async function POST(request) {
     // Load config
     let config = DEFAULT_CONFIG;
     try {
-      const configManager = new ConfigManager();
-      config = configManager.loadConfig();
+      const configManager = await getConfigManager();
+      config = await configManager.loadConfig();
     } catch (error) {
       console.log('Using default config:', error.message);
     }
