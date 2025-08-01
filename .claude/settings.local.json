@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run dev:*)",
+      "Bash(curl:*)",
+      "Bash(pkill:*)",
+      "Bash(taskkill:*)",
+      "Bash(make:*)",
+      "Bash(find:*)",
+      "Bash(mv:*)",
+      "Bash(true)",
+      "Bash(rmdir:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(if [ -d \"src/scripts\" ])",
+      "Bash(then rmdir src/scripts)",
+      "Bash(fi)",
+      "Bash(if [ -d \"src\" ])",
+      "Bash(then rmdir src)"
+    ],
+    "deny": []
+  }
+}

@@ -1,36 +1,141 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Video File Manager
 
-## Getting Started
+ローカル動画ファイルの一覧表示・サムネイル生成・再生を行うNext.jsアプリケーション
 
-First, run the development server:
+## 🚀 クイックスタート
+
+### 1. 依存関係のインストール
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. FFmpegのセットアップ
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+サムネイル生成にFFmpegが必要です。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Windows:**
+```bash
+# Chocolatey
+choco install ffmpeg
 
-## Learn More
+# または winget
+winget install ffmpeg
+```
 
-To learn more about Next.js, take a look at the following resources:
+**macOS:**
+```bash
+brew install ffmpeg
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Linux:**
+```bash
+# Ubuntu/Debian
+sudo apt install ffmpeg
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# CentOS/RHEL
+sudo yum install ffmpeg
+```
 
-## Deploy on Vercel
+### 3. 環境変数の設定
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+`.env.local` ファイルで動画ディレクトリを設定（既に設定済み）：
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+VIDEO_DIR=C:\\Users\\owner\\Downloads\\Video
+```
+
+### 4. 開発サーバーの起動
+
+```bash
+# プロジェクトルートから
+make dev
+
+# または直接
+cd src && npm run dev
+```
+
+### 5. アプリケーションへのアクセス
+
+ブラウザで [http://localhost:8080](http://localhost:8080) を開きます。
+
+## 📁 対応ファイル形式
+
+- `.mp4`
+- `.mkv` 
+- `.mov`
+- `.avi`
+- `.webm`
+
+## 🎨 機能
+
+- **動画一覧表示**: グリッドレイアウトでカード形式
+- **サムネイル生成**: FFmpegによる自動生成とキャッシュ
+- **動画再生**: HTML5 videoプレーヤー（ストリーミング対応）
+- **ダークモード**: ライト/ダーク切り替え
+- **レスポンシブ**: モバイル対応UI
+
+## 🛠 開発コマンド
+
+```bash
+# 開発サーバー（ポート8080）
+make dev
+
+# プロダクションビルド
+make build
+
+# プロダクション起動
+make start
+
+# コードのリント
+make lint
+
+# FFmpegセットアップ確認
+node src/scripts/setup-ffmpeg.js
+```
+
+## 📂 ディレクトリ構造
+
+```
+src/
+├── src/
+│   ├── app/                    # Next.js App Router
+│   │   ├── api/               # API routes
+│   │   │   └── videos/        # 動画関連API
+│   │   ├── layout.js          # ルートレイアウト
+│   │   └── page.js            # メインページ
+│   ├── components/            # Reactコンポーネント
+│   │   ├── VideoCard.js       # 動画カード
+│   │   ├── VideoPlayer.js     # 動画プレーヤー
+│   │   ├── ThemeProvider.js   # テーマプロバイダー
+│   │   └── ThemeToggle.js     # テーマ切り替え
+│   ├── lib/                   # ユーティリティ
+│   │   ├── listFiles.js       # ファイル一覧取得
+│   │   └── thumbnail.js       # サムネイル生成
+│   └── scripts/               # セットアップスクリプト
+└── public/
+    └── thumbnails/            # 生成されたサムネイル
+```
+
+## ⚠️ 注意事項
+
+- **ローカル実行専用**: ファイルシステムに直接アクセスするため、Vercel等へのデプロイは非対応
+- **FFmpeg必須**: サムネイル生成にFFmpegが必要
+- **セキュリティ**: パストラバーサル対策済み（環境変数で指定されたディレクトリのみアクセス可能）
+
+## 🔧 トラブルシューティング
+
+### サムネイルが表示されない
+1. FFmpegがインストールされているか確認: `ffmpeg -version`
+2. 動画ファイルが対応形式か確認
+3. ディスクの空き容量を確認
+
+### 動画が再生されない
+1. ブラウザが対応しているファイル形式か確認
+2. ファイルが破損していないか確認
+3. ネットワーク接続を確認
+
+### 動画が表示されない
+1. VIDEO_DIRが正しく設定されているか確認
+2. 指定されたディレクトリに動画ファイルが存在するか確認
+3. ファイルアクセス権限を確認
