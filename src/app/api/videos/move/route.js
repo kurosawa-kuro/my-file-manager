@@ -1,17 +1,16 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { listVideoFiles } from '../../../../lib/listFiles.js';
 import { DEFAULT_CONFIG } from '../../../../lib/config.js';
-import { getConfigManager } from '../../../../lib/sqliteConfigManager.js';
+import { getConfigManager } from '../../../../lib/unifiedConfigManager.js';
 
 export async function POST(request) {
   try {
-    const { videoId, fileName } = await request.json();
+    const { sourcePath, destinationPath } = await request.json();
     
-    if (!videoId || !fileName) {
+    if (!sourcePath || !destinationPath) {
       return NextResponse.json(
-        { error: 'videoId と fileName は必須です。' },
+        { error: 'sourcePath と destinationPath は必須です。' },
         { status: 400 }
       );
     }
@@ -20,11 +19,11 @@ export async function POST(request) {
     let config = DEFAULT_CONFIG;
     try {
       const configManager = await getConfigManager();
-      config = await configManager.loadConfig();
+      config = await configManager.getConfigForAPI();
     } catch (error) {
       console.log('Using default config:', error.message);
     }
-    
+
     const videoDir = config?.environment?.videoDir || process.env.VIDEO_DIR;
     
     if (!videoDir) {
@@ -34,50 +33,34 @@ export async function POST(request) {
       );
     }
 
-    // 移動先のフォルダパス
-    const qqqFolderPath = 'C:\\Users\\owner\\Downloads\\Video\\qqq';
-    
-    // 移動先フォルダが存在しない場合は作成
-    if (!fs.existsSync(qqqFolderPath)) {
-      fs.mkdirSync(qqqFolderPath, { recursive: true });
-    }
+    const fullSourcePath = path.join(videoDir, sourcePath);
+    const fullDestinationPath = path.join(videoDir, destinationPath);
 
-    // ビデオファイルリストから実際のファイルを検索
-    const videoFiles = listVideoFiles(videoDir);
-    const targetVideo = videoFiles.find(video => video.id === videoId);
-    
-    if (!targetVideo) {
-      return NextResponse.json(
-        { error: `ビデオが見つかりません。ID: ${videoId}` },
-        { status: 404 }
-      );
-    }
-
-    // 実際のファイルパス（listFiles.jsから取得したパス）
-    const actualFilePath = targetVideo.path;
-    const actualFileName = path.basename(actualFilePath);
-    
-    // 移動先ファイルパス
-    const targetFilePath = path.join(qqqFolderPath, actualFileName);
-    
     // ファイルが存在するかチェック
-    if (!fs.existsSync(actualFilePath)) {
+    if (!fs.existsSync(fullSourcePath)) {
       return NextResponse.json(
-        { error: `ファイルが見つかりません: ${actualFilePath}` },
+        { error: 'ソースファイルが見つかりません。' },
         { status: 404 }
       );
+    }
+
+    // 移動先のディレクトリを作成
+    const destinationDir = path.dirname(fullDestinationPath);
+    if (!fs.existsSync(destinationDir)) {
+      fs.mkdirSync(destinationDir, { recursive: true });
     }
 
     // ファイルを移動
-    fs.renameSync(actualFilePath, targetFilePath);
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: `ファイル "${actualFileName}" をqqqフォルダに移動しました。` 
+    fs.renameSync(fullSourcePath, fullDestinationPath);
+
+    return NextResponse.json({
+      success: true,
+      message: 'ファイルを移動しました。',
+      sourcePath,
+      destinationPath
     });
-    
   } catch (error) {
-    console.error('File move error:', error);
+    console.error('Move error:', error);
     return NextResponse.json(
       { error: `ファイルの移動に失敗しました: ${error.message}` },
       { status: 500 }

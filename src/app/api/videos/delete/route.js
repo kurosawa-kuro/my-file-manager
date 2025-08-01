@@ -1,17 +1,16 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { listVideoFiles } from '../../../../lib/listFiles.js';
 import { DEFAULT_CONFIG } from '../../../../lib/config.js';
-import { getConfigManager } from '../../../../lib/sqliteConfigManager.js';
+import { getConfigManager } from '../../../../lib/unifiedConfigManager.js';
 
-export async function POST(request) {
+export async function DELETE(request) {
   try {
-    const { videoId, fileName } = await request.json();
+    const { videoId } = await request.json();
     
-    if (!videoId || !fileName) {
+    if (!videoId) {
       return NextResponse.json(
-        { error: 'videoId と fileName は必須です。' },
+        { error: 'videoId は必須です。' },
         { status: 400 }
       );
     }
@@ -20,11 +19,11 @@ export async function POST(request) {
     let config = DEFAULT_CONFIG;
     try {
       const configManager = await getConfigManager();
-      config = await configManager.loadConfig();
+      config = await configManager.getConfigForAPI();
     } catch (error) {
       console.log('Using default config:', error.message);
     }
-    
+
     const videoDir = config?.environment?.videoDir || process.env.VIDEO_DIR;
     
     if (!videoDir) {
@@ -34,52 +33,29 @@ export async function POST(request) {
       );
     }
 
-    // 削除予定フォルダパス
-    const deleteFolderPath = 'C:\\Users\\owner\\Downloads\\Video_Local\\delete';
-    
-    // 削除予定フォルダが存在しない場合は作成
-    if (!fs.existsSync(deleteFolderPath)) {
-      fs.mkdirSync(deleteFolderPath, { recursive: true });
-    }
-
-    // ビデオファイルリストから実際のファイルを検索
-    const videoFiles = listVideoFiles(videoDir);
-    const targetVideo = videoFiles.find(video => video.id === videoId);
-    
-    if (!targetVideo) {
-      return NextResponse.json(
-        { error: `ビデオが見つかりません。ID: ${videoId}` },
-        { status: 404 }
-      );
-    }
-
-    // 実際のファイルパス
-    const actualFilePath = targetVideo.path;
-    const actualFileName = path.basename(actualFilePath);
-    
-    // 移動先ファイルパス
-    const targetFilePath = path.join(deleteFolderPath, actualFileName);
+    // ファイルパスを構築
+    const filePath = path.join(videoDir, videoId);
     
     // ファイルが存在するかチェック
-    if (!fs.existsSync(actualFilePath)) {
+    if (!fs.existsSync(filePath)) {
       return NextResponse.json(
-        { error: `ファイルが見つかりません: ${actualFilePath}` },
+        { error: 'ファイルが見つかりません。' },
         { status: 404 }
       );
     }
 
-    // ファイルを削除予定フォルダに移動
-    fs.renameSync(actualFilePath, targetFilePath);
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: `ファイル "${actualFileName}" を削除予定フォルダに移動しました。` 
+    // ファイルを削除
+    fs.unlinkSync(filePath);
+
+    return NextResponse.json({
+      success: true,
+      message: 'ファイルを削除しました。',
+      videoId
     });
-    
   } catch (error) {
-    console.error('Delete move error:', error);
+    console.error('Delete error:', error);
     return NextResponse.json(
-      { error: `ファイルの移動に失敗しました: ${error.message}` },
+      { error: `ファイルの削除に失敗しました: ${error.message}` },
       { status: 500 }
     );
   }

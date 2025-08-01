@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getConfigManager } from '../../../lib/sqliteConfigManager.js';
+import { getConfigManager } from '../../../lib/unifiedConfigManager.js';
 
 // 設定を取得
 export async function GET(request) {
   try {
     const configManager = await getConfigManager();
-    const config = await configManager.loadConfig();
+    const config = await configManager.getConfigForAPI();
     
     return NextResponse.json({
       success: true,

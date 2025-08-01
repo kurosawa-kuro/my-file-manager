@@ -1,17 +1,16 @@
 import { NextResponse } from 'next/server';
 import fs from 'fs';
 import path from 'path';
-import { listVideoFiles } from '../../../../lib/listFiles.js';
 import { DEFAULT_CONFIG } from '../../../../lib/config.js';
-import { getConfigManager } from '../../../../lib/sqliteConfigManager.js';
+import { getConfigManager } from '../../../../lib/unifiedConfigManager.js';
 
 export async function POST(request) {
   try {
-    const { videoId, fileName, suffix } = await request.json();
+    const { videoId, newName } = await request.json();
     
-    if (!videoId || !fileName || !suffix) {
+    if (!videoId || !newName) {
       return NextResponse.json(
-        { error: 'videoId、fileName、suffix は必須です。' },
+        { error: 'videoId と newName は必須です。' },
         { status: 400 }
       );
     }
@@ -20,11 +19,11 @@ export async function POST(request) {
     let config = DEFAULT_CONFIG;
     try {
       const configManager = await getConfigManager();
-      config = await configManager.loadConfig();
+      config = await configManager.getConfigForAPI();
     } catch (error) {
       console.log('Using default config:', error.message);
     }
-    
+
     const videoDir = config?.environment?.videoDir || process.env.VIDEO_DIR;
     
     if (!videoDir) {
@@ -34,33 +33,14 @@ export async function POST(request) {
       );
     }
 
-    // ビデオファイルリストから実際のファイルを検索
-    const videoFiles = listVideoFiles(videoDir);
-    const targetVideo = videoFiles.find(video => video.id === videoId);
-    
-    if (!targetVideo) {
-      return NextResponse.json(
-        { error: `ビデオが見つかりません。ID: ${videoId}` },
-        { status: 404 }
-      );
-    }
-
-    // 実際のファイルパス
-    const actualFilePath = targetVideo.path;
-    const actualFileName = path.basename(actualFilePath);
-    
-    // ファイル名と拡張子を分離
-    const ext = path.extname(actualFileName);
-    const nameWithoutExt = path.basename(actualFileName, ext);
-    
-    // 新しいファイル名を作成（末尾にsuffixを追加）
-    const newFileName = `${nameWithoutExt}${suffix}${ext}`;
-    const newFilePath = path.join(path.dirname(actualFilePath), newFileName);
+    // ファイルパスを構築
+    const oldFilePath = path.join(videoDir, videoId);
+    const newFilePath = path.join(videoDir, newName);
     
     // ファイルが存在するかチェック
-    if (!fs.existsSync(actualFilePath)) {
+    if (!fs.existsSync(oldFilePath)) {
       return NextResponse.json(
-        { error: `ファイルが見つかりません: ${actualFilePath}` },
+        { error: 'ファイルが見つかりません。' },
         { status: 404 }
       );
     }
@@ -68,20 +48,20 @@ export async function POST(request) {
     // 新しいファイル名が既に存在するかチェック
     if (fs.existsSync(newFilePath)) {
       return NextResponse.json(
-        { error: `同名のファイルが既に存在します: ${newFileName}` },
+        { error: '指定されたファイル名は既に存在します。' },
         { status: 409 }
       );
     }
 
-    // ファイル名を変更
-    fs.renameSync(actualFilePath, newFilePath);
-    
-    return NextResponse.json({ 
-      success: true, 
-      message: `ファイル名を "${newFileName}" に変更しました。`,
-      newFileName: newFileName
+    // ファイルをリネーム
+    fs.renameSync(oldFilePath, newFilePath);
+
+    return NextResponse.json({
+      success: true,
+      message: 'ファイル名を変更しました。',
+      oldName: videoId,
+      newName: newName
     });
-    
   } catch (error) {
     console.error('Rename error:', error);
     return NextResponse.json(

@@ -1,61 +1,155 @@
 'use client'
 
 import { createContext, useContext, useEffect, useState } from 'react'
-import ConfigManager from '../lib/configManager'
+import { getConfigManager } from '../lib/unifiedConfigManager.js'
 
 const ConfigContext = createContext()
-
-let configManagerInstance = null
-
-function getConfigManager() {
-  if (!configManagerInstance) {
-    configManagerInstance = new ConfigManager()
-  }
-  return configManagerInstance
-}
 
 export function ConfigProvider({ children }) {
   const [config, setConfig] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [configManager] = useState(() => getConfigManager())
+  const [configManager, setConfigManager] = useState(null)
 
   useEffect(() => {
-    try {
-      const loadedConfig = configManager.loadConfig()
-      setConfig(loadedConfig)
-    } catch (error) {
-      console.error('Failed to load config:', error)
-      setConfig(configManager.getDefaultConfig())
-    } finally {
-      setLoading(false)
+    let unsubscribe = null
+
+    const initializeConfig = async () => {
+      try {
+        const manager = await getConfigManager()
+        setConfigManager(manager)
+
+        const loadedConfig = await manager.loadConfig()
+        setConfig(loadedConfig)
+
+        unsubscribe = manager.subscribe((newConfig) => {
+          setConfig({ ...newConfig })
+        })
+      } catch (error) {
+        console.error('Failed to initialize config:', error)
+        // デフォルト設定を使用
+        try {
+          const manager = await getConfigManager()
+          setConfigManager(manager)
+          setConfig(manager.getDefaultConfig())
+        } catch (fallbackError) {
+          console.error('Failed to create fallback config manager:', fallbackError)
+          // 最後の手段として、ハードコードされたデフォルト設定を使用
+          setConfig({
+            app: {
+              title: 'Video File Manager',
+              subtitle: 'ローカル動画ファイルマネージャー',
+              theme: 'system',
+              language: 'ja'
+            },
+            video: {
+              autoplay: false,
+              volume: 0.7,
+              playbackRate: 1.0,
+              quality: 'auto',
+              thumbnailSize: 'medium'
+            },
+            directory: {
+              watchPath: '',
+              includeSubdirectories: true,
+              supportedFormats: ['.mp4', '.webm', '.ogg', '.avi', '.mov', '.wmv', '.flv', '.mkv', '.ts']
+            },
+            ui: {
+              itemsPerPage: 20,
+              sortBy: 'name',
+              sortOrder: 'asc',
+              gridView: false,
+              showThumbnails: true,
+              showFileInfo: true,
+              fileSortOrder: 'newest'
+            },
+            performance: {
+              enableThumbnailGeneration: true,
+              thumbnailCacheSize: 100,
+              videoPreloadCount: 3
+            },
+            environment: {
+              videoDir: 'C:\\Users\\owner\\Downloads\\Video',
+              isQqqOnly: false
+            }
+          })
+        }
+      } finally {
+        setLoading(false)
+      }
     }
 
-    const unsubscribe = configManager.subscribe((newConfig) => {
-      setConfig({ ...newConfig })
-    })
+    initializeConfig()
 
-    return unsubscribe
-  }, [configManager])
+    return () => {
+      if (unsubscribe) {
+        unsubscribe()
+      }
+    }
+  }, [])
 
-  const updateConfig = (path, value) => {
+  const updateConfig = async (path, value) => {
+    if (!configManager) {
+      throw new Error('Config manager not initialized')
+    }
+
     try {
-      configManager.set(path, value)
+      await configManager.set(path, value)
     } catch (error) {
       console.error('Failed to update config:', error)
       throw error
     }
   }
 
-  const resetConfig = () => {
-    configManager.reset()
+  const resetConfig = async () => {
+    if (!configManager) {
+      throw new Error('Config manager not initialized')
+    }
+
+    try {
+      await configManager.reset()
+    } catch (error) {
+      console.error('Failed to reset config:', error)
+      throw error
+    }
   }
 
-  const exportConfig = () => {
-    return configManager.exportConfig()
+  const exportConfig = async () => {
+    if (!configManager) {
+      throw new Error('Config manager not initialized')
+    }
+
+    try {
+      return await configManager.exportConfig()
+    } catch (error) {
+      console.error('Failed to export config:', error)
+      throw error
+    }
   }
 
-  const importConfig = (configString) => {
-    return configManager.importConfig(configString)
+  const importConfig = async (configString) => {
+    if (!configManager) {
+      throw new Error('Config manager not initialized')
+    }
+
+    try {
+      return await configManager.importConfig(configString)
+    } catch (error) {
+      console.error('Failed to import config:', error)
+      throw error
+    }
+  }
+
+  const getConfigValue = async (path) => {
+    if (!configManager) {
+      throw new Error('Config manager not initialized')
+    }
+
+    try {
+      return await configManager.get(path)
+    } catch (error) {
+      console.error('Failed to get config value:', error)
+      throw error
+    }
   }
 
   const value = {
@@ -65,7 +159,7 @@ export function ConfigProvider({ children }) {
     resetConfig,
     exportConfig,
     importConfig,
-    get: (path) => configManager.get(path)
+    get: getConfigValue
   }
 
   if (loading) {

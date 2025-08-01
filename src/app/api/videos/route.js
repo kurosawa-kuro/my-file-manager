@@ -1,7 +1,7 @@
 import { listVideoFiles } from '../../../lib/listFiles.js';
 import { NextResponse } from 'next/server';
 import { DEFAULT_CONFIG } from '../../../lib/config.js';
-import { getConfigManager } from '../../../lib/sqliteConfigManager.js';
+import { getConfigManager } from '../../../lib/unifiedConfigManager.js';
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
@@ -10,7 +10,7 @@ export async function GET(request) {
   let config = DEFAULT_CONFIG;
   try {
     const configManager = await getConfigManager();
-    config = await configManager.loadConfig();
+    config = await configManager.getConfigForAPI();
   } catch (error) {
     console.log('Using default config:', error.message);
   }
