@@ -7,8 +7,6 @@ export async function POST(request) {
   try {
     const { videoId, fileName } = await request.json();
     
-    console.log('Delete request:', { videoId, fileName });
-    
     if (!videoId || !fileName) {
       return NextResponse.json(
         { error: 'videoId と fileName は必須です。' },
@@ -31,7 +29,6 @@ export async function POST(request) {
     // 削除予定フォルダが存在しない場合は作成
     if (!fs.existsSync(deleteFolderPath)) {
       fs.mkdirSync(deleteFolderPath, { recursive: true });
-      console.log('Created delete folder');
     }
 
     // ビデオファイルリストから実際のファイルを検索
@@ -52,13 +49,6 @@ export async function POST(request) {
     // 移動先ファイルパス
     const targetFilePath = path.join(deleteFolderPath, actualFileName);
     
-    console.log('Delete move paths:', {
-      actualFilePath,
-      targetFilePath,
-      actualFileName,
-      exists: fs.existsSync(actualFilePath)
-    });
-    
     // ファイルが存在するかチェック
     if (!fs.existsSync(actualFilePath)) {
       return NextResponse.json(
@@ -69,8 +59,6 @@ export async function POST(request) {
 
     // ファイルを削除予定フォルダに移動
     fs.renameSync(actualFilePath, targetFilePath);
-    
-    console.log('File moved to delete folder successfully');
     
     return NextResponse.json({ 
       success: true, 

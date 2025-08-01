@@ -7,8 +7,6 @@ export async function POST(request) {
   try {
     const { videoId, fileName } = await request.json();
     
-    console.log('Move request:', { videoId, fileName });
-    
     if (!videoId || !fileName) {
       return NextResponse.json(
         { error: 'videoId と fileName は必須です。' },
@@ -17,8 +15,6 @@ export async function POST(request) {
     }
 
     const { VIDEO_DIR } = process.env;
-    
-    console.log('VIDEO_DIR:', VIDEO_DIR);
     
     if (!VIDEO_DIR) {
       return NextResponse.json(
@@ -33,7 +29,6 @@ export async function POST(request) {
     // 移動先フォルダが存在しない場合は作成
     if (!fs.existsSync(qqqFolderPath)) {
       fs.mkdirSync(qqqFolderPath, { recursive: true });
-      console.log('Created qqq folder');
     }
 
     // ビデオファイルリストから実際のファイルを検索
@@ -54,13 +49,6 @@ export async function POST(request) {
     // 移動先ファイルパス
     const targetFilePath = path.join(qqqFolderPath, actualFileName);
     
-    console.log('Paths:', {
-      actualFilePath,
-      targetFilePath,
-      actualFileName,
-      exists: fs.existsSync(actualFilePath)
-    });
-    
     // ファイルが存在するかチェック
     if (!fs.existsSync(actualFilePath)) {
       return NextResponse.json(
@@ -71,8 +59,6 @@ export async function POST(request) {
 
     // ファイルを移動
     fs.renameSync(actualFilePath, targetFilePath);
-    
-    console.log('File moved successfully');
     
     return NextResponse.json({ 
       success: true, 

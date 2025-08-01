@@ -7,8 +7,6 @@ export async function POST(request) {
   try {
     const { videoId, fileName, suffix } = await request.json();
     
-    console.log('Rename request:', { videoId, fileName, suffix });
-    
     if (!videoId || !fileName || !suffix) {
       return NextResponse.json(
         { error: 'videoId、fileName、suffix は必須です。' },
@@ -48,14 +46,6 @@ export async function POST(request) {
     const newFileName = `${nameWithoutExt}${suffix}${ext}`;
     const newFilePath = path.join(path.dirname(actualFilePath), newFileName);
     
-    console.log('Rename paths:', {
-      actualFilePath,
-      newFilePath,
-      actualFileName,
-      newFileName,
-      exists: fs.existsSync(actualFilePath)
-    });
-    
     // ファイルが存在するかチェック
     if (!fs.existsSync(actualFilePath)) {
       return NextResponse.json(
@@ -74,8 +64,6 @@ export async function POST(request) {
 
     // ファイル名を変更
     fs.renameSync(actualFilePath, newFilePath);
-    
-    console.log('File renamed successfully');
     
     return NextResponse.json({ 
       success: true, 
